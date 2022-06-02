@@ -1,0 +1,65 @@
+Index: src/main/java/com/sms/security/service/Реализация_выхода_из_приложения_.patch
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/com/sms/security/service/Реализация_выхода_из_приложения_.patch	(date 1653595904785)
++++ src/main/java/com/sms/security/service/Реализация_выхода_из_приложения_.patch	(date 1653595904785)
+@@ -136,56 +136,7 @@
+ +
+ +import static org.springframework.util.ObjectUtils.isEmpty;
+ +
+-+public class JwtTokenFilter extends OncePerRequestFilter {
+-+    @Autowired
+-+    private JwtTokenService jwtTokenService;
+-+
+-+    @Autowired
+-+    private BlacklistService blacklistService;
+-+
+-+    @Autowired
+-+    private UserDetailsServiceImpl userDetailsService;
+-+
+-+    @Override
+-+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+-+            throws ServletException, IOException {
+-+
+-+        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+-+        if (isEmpty(header) || !header.startsWith("Bearer ")) {
+-+            filterChain.doFilter(request, response);
+-+            return;
+-+        }
+-+
+-+        if (blacklistService.isTokenExist(header)) {
+-+            // Если мы здесь, то значит токен в чёрном списке (его пользователь сделал logout)
+-+            filterChain.doFilter(request, response);
+-+            return;
+-+        }
+-+
+-+        String token = header.split(" ")[1].trim();
+-+        if (!jwtTokenService.validate(token)) {
+-+            filterChain.doFilter(request, response);
+-+            return;
+-+        }
+-+
+-+        String username = jwtTokenService.getUsername(token); //Ищем Username в токене
+-+        Optional<User> user = userDetailsService.findByUsername(username);
+-+        if (user.isEmpty()) {
+-+            filterChain.doFilter(request, response);
+-+            return;
+-+        }
+-+
+-+        UserDetails userDetails = UserDetailsImpl.build(user.get());
+-+
+-+        UsernamePasswordAuthenticationToken authenticationToken =
+-+                new UsernamePasswordAuthenticationToken(
+-+                        userDetails, null, userDetails.getAuthorities());
+-+        authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+-+
+-+        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+-+        filterChain.doFilter(request, response);
+-+    }
+-+}
+++Изменения
+ Index: src/main/java/com/sms/security/config/jwt/JwtUtils.java
+ IDEA additional info:
+ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
